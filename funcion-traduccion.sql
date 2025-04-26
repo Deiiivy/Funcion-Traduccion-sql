@@ -6,12 +6,18 @@ CREATE FUNCTION dbo.TraducirFrase
 RETURNS NVARCHAR(MAX)
 AS
 BEGIN
-    DECLARE @FraseTraducida NVARCHAR(MAX) = @Frase;
-
-    SELECT @FraseTraducida = REPLACE(@FraseTraducida, f.Texto, ISNULL(t.Texto, f.Texto))
+    DECLARE @Resultado NVARCHAR(MAX) = @Frase;
+    
+    SELECT @Resultado = REPLACE(
+        @Resultado COLLATE SQL_Latin1_General_CP1_CI_AI, 
+        f.Texto COLLATE SQL_Latin1_General_CP1_CI_AI, 
+        ISNULL(t.Texto, f.Texto)
+    )
     FROM Frase f
-    LEFT JOIN Traduccion t ON t.IdFrase = f.Id AND t.IdIdioma = @IdIdioma;
+    LEFT JOIN Traduccion t ON f.Id = t.IdFrase AND t.IdIdioma = @IdIdioma
 
-    RETURN @FraseTraducida;
+    ORDER BY LEN(f.Texto) DESC;
+    
+    RETURN @Resultado;
 END;
 GO
